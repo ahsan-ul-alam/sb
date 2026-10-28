@@ -12,8 +12,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        User::updateOrCreate(['email' => 'admin@sellbees.test'], ['name' => 'Sellbees Admin', 'password' => 'password', 'role' => 'admin']);
-        User::updateOrCreate(['email' => 'user@sellbees.test'], ['name' => 'Demo User', 'password' => 'password', 'role' => 'user']);
+        // firstOrCreate: re-running the seeder must never reset an existing account's password
+        User::firstOrCreate(['email' => 'admin@sellbees.test'], ['name' => 'Sellbees Admin', 'password' => 'password', 'role' => 'admin']);
+        User::firstOrCreate(['email' => 'user@sellbees.test'], ['name' => 'Demo User', 'password' => 'password', 'role' => 'user']);
 
         // landing page content (only on a fresh install, never overwrites admin edits)
         foreach (SiteSchema::seedItems() as $type => $rows) {

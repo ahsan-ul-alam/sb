@@ -16,8 +16,17 @@ Route::get('/sitemap.xml', [PublicController::class, 'sitemap']);
 Route::get('/robots.txt', [PublicController::class, 'robots']);
 Route::get('/og-image.png', [PublicController::class, 'ogImage']);
 
-// cache / storage:link / migrate / composer install — admin POST or secret token (see MaintenanceController)
-Route::match(['get', 'post'], '/maintenance/{task}', [MaintenanceController::class, 'run'])->middleware('throttle:10,1');
+// key:generate / cache / storage:link / migrate / composer install, protected by MAINTENANCE_TOKEN.
+// Runs WITHOUT cookies/session/CSRF so it still works on a fresh deploy (no APP_KEY, no sessions table yet).
+Route::match(['get', 'post'], '/maintenance/{task}', [MaintenanceController::class, 'run'])
+    ->middleware('throttle:10,1')
+    ->withoutMiddleware([
+        \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
+    ]);
 
 Route::middleware('guest')->group(function () {
     Route::view('/login', 'auth')->name('login');
@@ -51,6 +60,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/selections', [AdminController::class, 'selections']);
         Route::get('/requests', [AdminController::class, 'requests']);
         Route::put('/requests/{purchaseRequest}', [AdminController::class, 'updateRequest']);
+
+        // dashboard "Maintenance" tab (admin session + CSRF)
+        Route::post('/maintenance/{task}', [MaintenanceController::class, 'run']);
 
         // landing page content, SEO and subscribers
         Route::get('/site', [SiteAdminController::class, 'index']);

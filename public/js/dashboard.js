@@ -303,21 +303,24 @@ views.subscribers = async function () {
 
 views.maintenance = function () {
   const tasks = [
+    ['key', 'Generate app key', 'Only if APP_KEY is empty — an existing key is never overwritten'],
     ['cache', 'Clear all cache', 'Config, route, view and landing-page cache'],
+    ['seed', 'Seed starter data', 'Landing content, demo accounts and products — only fills what is missing'],
     ['storage', 'Storage link', 'Create public/storage so uploaded images are served'],
     ['migrate', 'Run migrations', 'Apply new database changes (--force)'],
     ['composer', 'Composer install', 'Install PHP dependencies (can take a few minutes)'],
-    ['all', 'Run everything', 'composer → migrate → storage link → clear cache'],
+    ['artisan', 'App key + migrate + storage link + clear cache', 'Artisan calls only (no composer) — the usual deploy step'],
+    ['all', 'Run everything', 'composer → app key → migrate → storage link → clear cache'],
   ];
   $('#view').innerHTML = `<div class="panel"><h2>Maintenance</h2><p style="color:var(--muted)">Run server tasks without SSH. Each task stops on the first error.</p>
-    <div class="pgrid" style="margin-top:14px">${tasks.map(([k, l, d]) => `<div class="panel" style="margin:0"><b>${l}</b><p style="color:var(--muted);font-size:.88rem;margin:4px 0 12px">${d}</p><button class="btn ${k === 'all' ? '' : 'ghost'} sm" data-t="${k}">Run</button></div>`).join('')}</div>
+    <div class="pgrid" style="margin-top:14px">${tasks.map(([k, l, d]) => `<div class="panel" style="margin:0"><b>${l}</b><p style="color:var(--muted);font-size:.88rem;margin:4px 0 12px">${d}</p><button class="btn ${k === 'artisan' ? '' : 'ghost'} sm" data-t="${k}">Run</button></div>`).join('')}</div>
     <pre id="mout" style="display:none;margin-top:16px;background:var(--dark);color:#e8dfc8;padding:16px;border-radius:12px;max-height:380px;overflow:auto;white-space:pre-wrap;font-size:.82rem"></pre></div>`;
   $('#view').querySelectorAll('[data-t]').forEach(b => b.onclick = async () => {
     if (b.dataset.t === 'composer' || b.dataset.t === 'all') if (!confirm('This replaces files in /vendor and may take a few minutes. Continue?')) return;
     const out = $('#mout'); out.style.display = 'block'; out.textContent = 'Running…';
     document.querySelectorAll('[data-t]').forEach(x => x.disabled = true);
     try {
-      const res = await fetch('/maintenance/' + b.dataset.t, {method: 'POST', headers: {'Accept': 'application/json', 'X-CSRF-TOKEN': csrf()}});
+      const res = await fetch('/admin/maintenance/' + b.dataset.t, {method: 'POST', headers: {'Accept': 'application/json', 'X-CSRF-TOKEN': csrf()}});
       const d = await res.json().catch(() => ({message: 'Server error (' + res.status + ')'}));
       out.textContent = d.results ? d.results.map(r => `$ ${r.task} — ${r.ok ? 'OK' : 'FAILED'}\n${r.output}`).join('\n\n') : (d.message || 'Failed');
       toast(d.ok ? 'Done' : 'Finished with errors', d.ok ? '' : 'bad');

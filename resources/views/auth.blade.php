@@ -8,7 +8,8 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="{{ $brand['theme'] }}">
 <script>try{if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}</script>
-<link rel="stylesheet" href="/css/app.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23f5a300'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="@v('css/app.css')">
 </head>
 <body>
 <button type="button" class="theme-btn auth-theme" data-theme-toggle aria-label="Switch to dark mode">🌙</button>
@@ -29,7 +30,7 @@
     <div class="hint">Demo — admin: <b>admin@sellbees.test</b> · user: <b>user@sellbees.test</b> · password: <b>password</b></div>
   </div>
 </div>
-<script src="/js/theme.js" defer></script>
+<script src="@v('js/theme.js')" defer></script>
 <script>
 const $ = s => document.querySelector(s);
 let mode = 'login';

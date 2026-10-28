@@ -16,15 +16,22 @@ use Symfony\Component\Process\Process;
  */
 class MaintenanceController extends Controller
 {
-    private const TASKS = ['cache', 'storage', 'migrate', 'composer', 'all'];
+    private const TASKS = ['key', 'cache', 'storage', 'migrate', 'seed', 'composer', 'artisan', 'all'];
+
+    private bool $force = false;
 
     public function run(Request $request, string $task): JsonResponse
     {
         abort_unless(in_array($task, self::TASKS, true), 404);
         $this->authorizeRequest($request);
+        $this->force = $request->boolean('force'); // only honoured after authorisation
 
         @set_time_limit(0);
-        $steps = $task === 'all' ? ['composer', 'migrate', 'storage', 'cache'] : [$task];
+        $steps = match ($task) {
+            'all' => ['composer', 'key', 'migrate', 'storage', 'cache'],
+            'artisan' => ['key', 'migrate', 'storage', 'cache'], // Artisan calls only, no composer
+            default => [$task],
+        };
 
         $results = [];
         foreach ($steps as $step) {
@@ -53,6 +60,24 @@ class MaintenanceController extends Controller
         abort_unless($secret !== '' && hash_equals($secret, $given), 403, 'Forbidden.');
     }
 
+    /** Generates APP_KEY only when missing; regenerating logs everyone out and breaks encrypted data. */
+    private function key(): array
+    {
+        $out = '';
+        if (! is_file(base_path('.env')) && is_file(base_path('.env.example'))) {
+            copy(base_path('.env.example'), base_path('.env'));
+            $out = ".env created from .env.example\n";
+        }
+
+        if (config('app.key') && ! $this->force) {
+            return ['ok' => true, 'output' => $out.'APP_KEY already set — skipped. Add &force=1 to regenerate it (logs everyone out and invalidates encrypted data).'];
+        }
+
+        Artisan::call('key:generate', ['--force' => true]);
+
+        return ['ok' => true, 'output' => $out.trim(Artisan::output())];
+    }
+
     private function cache(): array
     {
         Artisan::call('optimize:clear');
@@ -76,6 +101,14 @@ class MaintenanceController extends Controller
         Artisan::call('migrate', ['--force' => true]);
 
         return ['ok' => true, 'output' => trim(Artisan::output())];
+    }
+
+    /** Landing content + demo accounts/products. Idempotent: never overwrites existing rows. Not part of "all". */
+    private function seed(): array
+    {
+        Artisan::call('db:seed', ['--force' => true]);
+
+        return ['ok' => true, 'output' => trim(Artisan::output()) ?: 'Seeded.'];
     }
 
     private function composer(): array

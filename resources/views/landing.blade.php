@@ -11,7 +11,6 @@
     $sym = $s['currency_symbol'];
     $safeUrl = fn ($u) => preg_match('~^(https?://|/|#|mailto:|tel:)~i', (string) $u) ? $u : '#';
     $favicon = $s['logo_url'] ?: 'data:image/svg+xml,'.rawurlencode("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='#f5a300'/><text x='50' y='68' font-size='56' text-anchor='middle'>{$s['brand_icon']}</text></svg>");
-    $v = fn ($f) => filemtime(public_path($f));
     $on = fn ($k) => (bool) ($s['show_'.$k] ?? true);
     $svOn = $on('services') && ! empty($it['service']);
     $first = $on('store') ? ($products[0] ?? null) : null;
@@ -63,20 +62,27 @@
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <script>try{if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}</script>
-<link rel="stylesheet" href="/css/app.css?v={{ $v('css/app.css') }}">
-<link rel="stylesheet" href="/css/landing.css?v={{ $v('css/landing.css') }}">
+<link rel="stylesheet" href="@v('css/app.css')">
+<link rel="stylesheet" href="@v('css/landing.css')">
 </head>
 <body class="lp">
 
 <nav class="lp-nav" aria-label="Main">
   <div class="bar">
     <a href="/" class="logo" aria-label="{{ $s['brand_name'] }} home">{!! $brandMark !!}@unless ($s['logo_url']) {{ $s['brand_name'] }}@endunless</a>
-    <ul>
+    <ul id="navList">
       @if ($svOn)<li><a href="#services">Services</a></li>@endif
       @if ($on('process') && !empty($it['step']))<li><a href="#process">Process</a></li>@endif
       @if ($on('store'))<li><a href="#store">Store</a></li>@endif
       @if ($on('work') && !empty($it['case']))<li><a href="#work">Work</a></li>@endif
       @if ($on('faq') && !empty($it['faq']))<li><a href="#faq">FAQ</a></li>@endif
+      {{-- account links live in the mobile menu because the header buttons are hidden on phones --}}
+      @auth
+        <li class="mob"><a href="{{ route('dashboard') }}">Dashboard →</a></li>
+      @else
+        <li class="mob"><a href="{{ route('login') }}">Login</a></li>
+        <li class="mob"><a href="{{ $registerUrl }}">Register</a></li>
+      @endauth
     </ul>
     <div class="nav-r">
       <button type="button" class="theme-btn" data-theme-toggle aria-label="Switch to dark mode">🌙</button>
@@ -85,6 +91,7 @@
       @else
         <a class="btn sm ghost" href="{{ route('login') }}">Login</a><a class="btn sm dark" href="{{ $registerUrl }}">Register</a>
       @endauth
+      <button type="button" class="theme-btn menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="navList">☰</button>
     </div>
   </div>
 </nav>
@@ -357,8 +364,16 @@
   </div>
 </footer>
 
-<script src="/js/theme.js" defer></script>
+<script src="@v('js/theme.js')" defer></script>
 <script>
+// mobile menu
+const nav = document.querySelector('.lp-nav'), mb = document.getElementById('menuBtn');
+const setMenu = open => { nav.classList.toggle('open', open); mb.setAttribute('aria-expanded', open); mb.textContent = open ? '✕' : '☰'; mb.setAttribute('aria-label', open ? 'Close menu' : 'Open menu'); };
+mb.onclick = () => setMenu(!nav.classList.contains('open'));
+document.querySelectorAll('#navList a').forEach(a => a.addEventListener('click', () => setMenu(false)));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+matchMedia('(min-width:961px)').addEventListener('change', e => { if (e.matches) setMenu(false); });
+
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold: .12});
 document.querySelectorAll('.rv').forEach(el => io.observe(el));
 

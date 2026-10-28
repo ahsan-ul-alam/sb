@@ -7,7 +7,8 @@
 <title>Dashboard — {{ $brand['name'] }}</title>
 <meta name="robots" content="noindex,nofollow">
 <script>try{if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}</script>
-<link rel="stylesheet" href="/css/app.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23f5a300'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="@v('css/app.css')">
 </head>
 <body>
 <header class="app-top">
@@ -33,7 +34,7 @@
 <div class="toast-area" id="toasts"></div>
 
 <script>window.APP = {role: @json(auth()->user()->role), name: @json(auth()->user()->name), currency: @json($brand['currency'])};</script>
-<script src="/js/theme.js" defer></script>
-<script src="/js/dashboard.js"></script>
+<script src="@v('js/theme.js')" defer></script>
+<script src="@v('js/dashboard.js')"></script>
 </body>
 </html>

@@ -125,6 +125,38 @@ class LandingTest extends TestCase
         $this->actingAs(User::factory()->create())->get('/dashboard')->assertOk()->assertSee('data-theme-toggle', false);
     }
 
+    public function test_assets_are_versioned_relative_and_https_aware_in_production(): void
+    {
+        // every page links cache-busted, relative asset URLs (no http:// mixed content behind a proxy)
+        $pages = [
+            $this->get('/')->getContent(),
+            $this->get('/login')->getContent(),
+            $this->actingAs(User::factory()->create())->get('/dashboard')->getContent(),
+        ];
+        foreach ($pages as $html) {
+            $this->assertMatchesRegularExpression('~href="/css/app\.css\?v=\d+"~', $html);
+            $this->assertMatchesRegularExpression('~src="/js/theme\.js\?v=\d+"~', $html);
+        }
+        $this->assertMatchesRegularExpression('~href="/css/landing\.css\?v=\d+"~', $pages[0]);
+        $this->assertMatchesRegularExpression('~src="/js/dashboard\.js\?v=\d+"~', $pages[2]);
+
+        // behind an https proxy, generated absolute URLs (og:url, canonical, schema) must be https
+        $html = $this->get('/', ['X-Forwarded-Proto' => 'https', 'X-Forwarded-Host' => 'example.com', 'X-Forwarded-Port' => '443'])->getContent();
+        $this->assertStringContainsString('property="og:url" content="https://example.com', $html);
+        $this->assertStringNotContainsString('http://example.com', $html);
+
+        // a static public/robots.txt would shadow the dynamic one (with the sitemap line)
+        $this->assertFileDoesNotExist(public_path('robots.txt'));
+    }
+
+    public function test_landing_has_a_mobile_menu_and_viewport(): void
+    {
+        $this->get('/')->assertOk()
+            ->assertSee('name="viewport" content="width=device-width,initial-scale=1"', false)
+            ->assertSee('id="menuBtn"', false)
+            ->assertSee('id="navList"', false);
+    }
+
     public function test_newsletter_subscribe(): void
     {
         $this->postJson('/subscribe', ['email' => 'a@b.co'])->assertOk();

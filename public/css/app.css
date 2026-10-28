@@ -209,3 +209,58 @@ th{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.
 .theme-btn:hover{border-color:var(--brand);background:var(--brand-soft)}
 .nav-r{display:flex;align-items:center;gap:10px}
 .auth-theme{position:fixed;top:16px;right:16px;z-index:5}
+
+/* ================= responsive hardening (auth + dashboard) ================= */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-x:hidden}
+.tabbar{scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabbar::-webkit-scrollbar{display:none}
+.panel table{min-width:520px}
+
+@media(max-width:860px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .modal .box{max-width:520px}
+}
+
+@media(max-width:640px){
+  .wrap{padding:0 14px}
+  .auth{padding:16px}
+  .auth-box{padding:24px 20px;border-radius:18px}
+  .app-top .wrap{height:56px;gap:8px}
+  .app-top .right{gap:6px}
+  .app-top .logo{font-size:1.05rem}
+  .badge-role{display:none}
+  .app-top .btn.sm{padding:7px 11px}
+  .tabbar{margin:16px -14px 14px;padding:0 14px 6px}
+  .tabbar button{padding:8px 14px;font-size:.85rem}
+  .toolbar{align-items:stretch}
+  .toolbar input,.toolbar select{max-width:none;width:100%}
+  .panel{padding:16px;border-radius:12px}
+  .line{flex-wrap:wrap;gap:8px}
+  .line>div:last-child{margin-left:auto}
+  .meta{align-items:flex-start}
+  .total{font-size:1.05rem}
+  .actions>select,.actions>input,.actions>.btn{flex:1 1 100%;width:100%}
+  .kpis{gap:10px}
+  .kpi{padding:14px}
+  .kpi b{font-size:1.5rem}
+  .pgrid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .prod .body{padding:10px 12px}
+  .prod h3{font-size:.95rem}
+  .prod .row{flex-wrap:wrap}
+  .thumb{font-size:2rem}
+  .dd{left:8px;right:8px;width:auto;top:58px;max-width:none}
+  .modal.open{align-items:end;padding:0}
+  .modal .box{border-radius:20px 20px 0 0;max-width:none;max-height:94vh}
+  .modal .pad{padding:18px}
+  .toast-area{left:12px;right:12px;bottom:12px}
+  .toast{max-width:none}
+  .togs{grid-template-columns:1fr}
+  th,td{padding:9px 6px}
+}
+
+@media(max-width:380px){
+  .pgrid{grid-template-columns:1fr}
+  .app-top .who{display:none}
+  .app-top .btn.ghost.sm:not(.bell){padding:7px 9px}
+}
