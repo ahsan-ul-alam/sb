@@ -221,7 +221,7 @@ details p{color:var(--muted);margin-top:12px;max-width:560px}
 .pc .im{background-size:cover}
 
 /* ---- footer ---- */
-.lp-foot{padding:0 0 28px;position:relative;overflow:hidden}
+.lp-foot{padding:0 0 28px;position:relative}
 .lp-foot::before{content:"";position:absolute;inset:0;background:var(--hex);opacity:.35;pointer-events:none}
 .lp-foot .wrap{position:relative}
 .news{display:flex;justify-content:space-between;align-items:center;gap:28px;flex-wrap:wrap;padding:40px 44px;margin-bottom:56px;transform:translateY(-34px);background:var(--brand);color:#1c1200;border-radius:28px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
@@ -233,6 +233,9 @@ details p{color:var(--muted);margin-top:12px;max-width:560px}
 .news .btn:hover{background:#fff;color:#1c1200}
 .news .msg{flex-basis:100%;font-size:.88rem;font-weight:600;min-height:1.2em}
 .news .msg.bad{color:#7f1d1d}
+.news .msg.ok{color:#14532d}
+.news input:focus{outline:3px solid #1c1200;outline-offset:2px}
+.news .btn[disabled]{opacity:.6}
 .lp-foot:not(:has(.news)) .fg{padding-top:64px}
 .fg{grid-template-columns:1.7fr repeat(auto-fit,minmax(130px,1fr));gap:40px}
 .lp-foot .about{max-width:320px;margin-bottom:16px}
