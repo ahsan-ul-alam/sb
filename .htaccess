@@ -1,8 +1,6 @@
-# Shared hosting / cPanel safety net: if the domain points at the project folder instead of /public,
-# send every request into /public so /css, /js, /storage and the app itself all resolve.
-# (Best practice is still to point the document root at /public.)
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
     RewriteCond %{REQUEST_URI} !^/public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>

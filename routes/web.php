@@ -8,7 +8,40 @@ use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\SiteAdminController;
 use App\Http\Middleware\EnsureAdmin;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/system-maintenance/{token}', function ($token) {
+
+    abort_unless(
+        hash_equals("ahsan", $token),
+        403
+    );
+
+    $commands = [
+        'optimize:clear',
+        'cache:clear',
+        'config:clear',
+        'route:clear',
+        'view:clear',
+        'storage:link',
+    ];
+
+    $results = [];
+
+    foreach ($commands as $command) {
+        try {
+            Artisan::call($command);
+
+            $results[$command] = Artisan::output();
+        } catch (\Throwable $e) {
+            $results[$command] = 'ERROR: ' . $e->getMessage();
+        }
+    }
+
+    return response()->json($results);
+
+});
 
 Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::post('/subscribe', [PublicController::class, 'subscribe'])->middleware('throttle:6,1');
