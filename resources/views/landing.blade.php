@@ -69,8 +69,15 @@
 
 <nav class="lp-nav" aria-label="Main">
   <div class="bar">
-    <a href="/" class="logo" aria-label="{{ $s['brand_name'] }} home">{!! $brandMark !!}@unless ($s['logo_url']) {{ $s['brand_name'] }}@endunless</a>
+    <div class="nav-l">
+      <button type="button" class="theme-btn menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="navList">☰</button>
+      <a href="/" class="logo" aria-label="{{ $s['brand_name'] }} home">{!! $brandMark !!}@unless ($s['logo_url']) {{ $s['brand_name'] }}@endunless</a>
+    </div>
     <ul id="navList">
+      <li class="drawer-head">
+        <a href="/" class="logo" aria-label="{{ $s['brand_name'] }} home">{!! $brandMark !!}@unless ($s['logo_url']) {{ $s['brand_name'] }}@endunless</a>
+        <button type="button" class="theme-btn" id="menuClose" aria-label="Close menu">✕</button>
+      </li>
       @if ($svOn)<li><a href="#services">Services</a></li>@endif
       @if ($on('process') && !empty($it['step']))<li><a href="#process">Process</a></li>@endif
       @if ($on('store'))<li><a href="#store">Store</a></li>@endif
@@ -91,9 +98,9 @@
       @else
         <a class="btn sm ghost" href="{{ route('login') }}">Login</a><a class="btn sm dark" href="{{ $registerUrl }}">Register</a>
       @endauth
-      <button type="button" class="theme-btn menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="navList">☰</button>
     </div>
   </div>
+  <div class="nav-overlay" id="navOverlay"></div>
 </nav>
 
 <main>
@@ -368,8 +375,16 @@
 <script>
 // mobile menu
 const nav = document.querySelector('.lp-nav'), mb = document.getElementById('menuBtn');
-const setMenu = open => { nav.classList.toggle('open', open); mb.setAttribute('aria-expanded', open); mb.textContent = open ? '✕' : '☰'; mb.setAttribute('aria-label', open ? 'Close menu' : 'Open menu'); };
+// left drawer on tablet/phone: hamburger opens it; ✕, the dark overlay, a link tap or Esc closes it
+const setMenu = open => {
+  nav.classList.toggle('open', open);
+  mb.setAttribute('aria-expanded', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+  if (open) document.getElementById('menuClose').focus({preventScroll: true}); else if (document.activeElement && nav.contains(document.activeElement)) mb.focus({preventScroll: true});
+};
 mb.onclick = () => setMenu(!nav.classList.contains('open'));
+document.getElementById('menuClose').onclick = () => setMenu(false);
+document.getElementById('navOverlay').onclick = () => setMenu(false);
 document.querySelectorAll('#navList a').forEach(a => a.addEventListener('click', () => setMenu(false)));
 document.addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
 matchMedia('(min-width:961px)').addEventListener('change', e => { if (e.matches) setMenu(false); });

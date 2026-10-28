@@ -154,7 +154,9 @@ class LandingTest extends TestCase
         $this->get('/')->assertOk()
             ->assertSee('name="viewport" content="width=device-width,initial-scale=1"', false)
             ->assertSee('id="menuBtn"', false)
-            ->assertSee('id="navList"', false);
+            ->assertSee('id="navList"', false)
+            ->assertSee('id="menuClose"', false)   // left drawer: close button
+            ->assertSee('id="navOverlay"', false); // left drawer: dim overlay
     }
 
     public function test_newsletter_subscribe(): void
